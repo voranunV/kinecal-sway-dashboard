@@ -1,0 +1,91 @@
+﻿part_id,participant_file_id,group,fall_history,age,sex,height,weight,BMI,recorded_in_the_lab,clinically_at_risk
+SPPB10,10,HA,No Fall History,32.0,m,1.85,77.0,22.5,1,0
+SPPB100,100,NF,No Fall History,70.0,f,1.55,82.5,34.3,1,0
+SPPB11,11,HA,No Fall History,44.0,f,1.57,51.5,20.9,1,0
+SPPB12,12,HA,No Fall History,55.0,m,1.64,68.5,25.5,1,0
+SPPB13,13,HA,No Fall History,43.0,m,1.78,85.0,26.8,1,0
+SPPB14,14,HA,No Fall History,53.0,m,1.83,70.0,20.9,1,0
+SPPB15,15,HA,No Fall History,56.0,m,1.78,96.7,30.5,1,0
+SPPB16,16,HA,No Fall History,57.0,m,1.63,70.0,26.3,1,0
+SPPB17,17,HA,No Fall History,58.0,m,1.76,77.0,24.9,1,0
+SPPB18,18,HA,No Fall History,58.0,m,1.88,98.0,27.7,1,0
+SPPB19,19,HA,No Fall History,32.0,m,1.78,79.0,24.9,1,0
+SPPB2,2,HA,No Fall History,54.0,m,1.82,73.0,22.0,1,0
+SPPB20,20,HA,No Fall History,32.0,m,1.66,60.0,21.8,1,0
+SPPB200,200,FHs,Fall History,60.0,m,1.63,63.5,23.9,0,0
+SPPB201,201,FHm,Fall History,81.0,f,1.52,54.0,23.4,0,1
+SPPB21,21,HA,No Fall History,55.0,m,1.7,116.0,40.1,0,0
+SPPB22,22,HA,No Fall History,23.0,f,1.6,86.8,33.9,0,0
+SPPB23,23,HA,No Fall History,56.0,f,1.68,64.4,22.8,0,0
+SPPB24,24,HA,No Fall History,47.0,f,1.57,73.0,29.6,0,0
+SPPB25,25,HA,No Fall History,25.0,m,1.81,66.0,20.1,0,0
+SPPB26,26,HA,No Fall History,45.0,m,1.73,76.0,25.4,1,0
+SPPB3,3,FHm,Fall History,71.0,m,1.8,81.6,25.2,1,0
+SPPB300,300,HA,No Fall History,48.0,f,1.57,49.8,20.2,0,0
+SPPB301,301,HA,No Fall History,38.0,f,1.63,53.0,19.9,0,0
+SPPB302,302,HA,No Fall History,51.0,f,1.68,63.0,22.3,0,0
+SPPB303,303,HA,No Fall History,38.0,m,1.8,69.8,21.5,0,0
+SPPB304,304,FHs,Fall History,84.0,f,1.63,60.3,22.7,0,0
+SPPB305,305,NF,No Fall History,66.0,m,1.68,65.8,23.3,0,0
+SPPB306,306,HA,No Fall History,63.0,m,1.78,70.7,22.3,0,0
+SPPB307,307,NF,No Fall History,90.0,m,1.73,66.7,22.3,0,1
+SPPB308,308,HA,No Fall History,64.0,f,1.57,63.5,25.8,0,0
+SPPB309,309,FHm,Fall History,78.0,f,1.56,70.0,28.8,0,1
+SPPB310,310,FHs,Fall History,80.0,m,1.78,72.1,22.8,0,0
+SPPB311,311,NF,No Fall History,78.0,f,1.6,63.0,24.6,0,1
+SPPB312,312,NF,No Fall History,73.0,f,1.7,77.1,26.7,0,0
+SPPB313,313,NF,No Fall History,77.0,f,1.73,75.0,25.1,0,0
+SPPB314,314,FHs,Fall History,82.0,f,1.56,59.4,24.4,0,0
+SPPB315,315,FHm,Fall History,78.0,f,1.68,90.0,31.9,0,1
+SPPB4,4,HA,No Fall History,38.0,m,1.75,80.0,26.1,1,0
+SPPB40,40,FHs,Fall History,67.0,m,1.9,102.5,28.4,0,0
+SPPB400,400,FHs,Fall History,64.0,f,1.73,66.7,22.3,0,0
+SPPB401,401,FHs,Fall History,68.0,f,1.7,68.0,23.5,0,0
+SPPB402,402,NF,No Fall History,72.0,f,1.63,50.8,19.1,0,0
+SPPB403,403,NF,No Fall History,72.0,f,1.73,58.0,19.4,0,0
+SPPB404,404,FHm,Fall History,72.0,f,1.57,63.0,25.6,0,0
+SPPB405,405,NF,No Fall History,73.0,m,1.88,87.0,24.6,0,0
+SPPB406,406,NF,No Fall History,78.0,m,1.78,88.0,27.8,0,0
+SPPB407,407,NF,No Fall History,84.0,m,1.7,70.8,24.5,0,0
+SPPB41,41,NF,No Fall History,74.0,f,1.68,56.2,19.9,0,0
+SPPB42,42,FHm,Fall History,66.0,f,1.66,87.0,31.6,0,0
+SPPB43,43,NF,No Fall History,74.0,m,1.73,74.0,24.7,0,0
+SPPB44,44,FHs,Fall History,76.0,f,1.65,50.8,18.7,0,0
+SPPB45,45,NF,No Fall History,77.0,f,1.58,60.3,24.2,0,0
+SPPB46,46,NF,No Fall History,76.0,m,1.72,60.0,20.3,0,0
+SPPB47,47,NF,No Fall History,65.0,m,1.78,70.2,22.2,0,0
+SPPB48,48,NF,No Fall History,72.0,m,1.7,73.4,25.4,0,0
+SPPB5,5,HA,No Fall History,56.0,m,1.75,70.0,22.9,1,0
+SPPB500,500,HA,No Fall History,32.0,m,1.81,76.0,23.2,1,0
+SPPB501,501,NF,No Fall History,74.0,f,1.56,67.0,27.5,1,0
+SPPB502,502,NF,No Fall History,76.0,f,1.6,57.0,22.3,1,0
+SPPB504,504,HA,No Fall History,58.0,m,1.71,70.0,23.9,1,0
+SPPB505,505,HA,No Fall History,39.0,m,1.78,90.0,28.4,1,0
+SPPB51,51,NF,No Fall History,81.0,f,1.58,55.3,22.2,0,0
+SPPB6,6,HA,No Fall History,55.0,f,1.54,62.0,26.1,1,0
+SPPB60,60,NF,No Fall History,68.0,m,1.75,79.0,25.8,0,0
+SPPB61,61,NF,No Fall History,65.0,m,1.73,65.3,21.8,0,0
+SPPB62,62,FHm,Fall History,64.0,f,1.63,65.3,24.6,0,0
+SPPB64,64,FHs,Fall History,69.0,m,1.65,65.3,24.0,0,0
+SPPB66,66,FHs,Fall History,64.0,f,1.61,75.3,29.0,0,0
+SPPB67,67,NF,No Fall History,70.0,f,1.68,63.5,22.5,0,0
+SPPB68,68,NF,No Fall History,71.0,f,1.68,69.0,24.4,0,0
+SPPB7,7,HA,No Fall History,46.0,f,1.7,59.0,20.4,1,0
+SPPB700,700,FHm,Fall History,70.0,m,1.7,75.0,26.0,0,0
+SPPB701,701,FHs,Fall History,74.0,f,1.65,85.0,31.2,0,0
+SPPB703,703,NF,No Fall History,65.0,m,1.8,89.0,27.5,0,0
+SPPB704,704,NF,No Fall History,82.0,f,1.6,53.5,20.9,0,0
+SPPB705,705,FHs,Fall History,75.0,m,1.88,87.0,24.6,0,0
+SPPB706,706,FHs,Fall History,82.0,m,1.75,79.0,25.8,0,0
+SPPB707,707,NF,No Fall History,74.0,m,1.75,77.6,25.3,0,0
+SPPB708,708,NF,No Fall History,67.0,f,1.75,73.0,23.8,0,0
+SPPB71,71,NF,No Fall History,75.0,f,1.6,77.1,30.1,0,0
+SPPB73,73,NF,No Fall History,70.0,m,1.78,69.8,22.0,0,0
+SPPB8,8,HA,No Fall History,25.0,f,1.69,89.0,31.2,1,0
+SPPB80,80,NF,No Fall History,71.0,f,1.57,50.1,20.3,0,0
+SPPB81,81,NF,No Fall History,71.0,m,1.8,82.5,25.5,0,0
+SPPB84,84,FHm,Fall History,78.0,f,1.56,60.0,24.7,0,0
+SPPB87,87,FHs,Fall History,75.0,f,1.6,77.1,30.1,0,1
+SPPB9,9,HA,No Fall History,48.0,m,1.69,75.0,26.3,1,0
+SPPB92,92,NF,No Fall History,70.0,m,1.83,97.0,29.0,0,0
+SPPB96,96,FHs,Fall History,65.0,m,1.78,81.2,25.6,0,0
