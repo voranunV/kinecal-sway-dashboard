@@ -1,0 +1,9 @@
+﻿condition,outcome,selected_model,reference_type,OOF_MAE,OOF_RMSE,OOF_R2,baseline_MAE,MAE_improvement_pct,dashboard_use_note_th
+EO,RDIST,Model B — Age + Sex + Fall History,Personalized regression,0.17464543499337007,0.23445002423284458,0.07074742586739535,0.18411557093425604,5.143582312365946,ใช้ Expected Sway แบบรายบุคคลได้ในฐานะข้อมูลประกอบ แต่ไม่ใช่เกณฑ์วินิจฉัย
+EO,MVELO,Model B — Age + Sex + Fall History,Personalized regression,0.2827448420722355,0.4677080818869386,-0.030786800720568275,0.28682456747404844,1.4223765550285643,โมเดลเฉพาะบุคคลลด MAE ได้เล็กน้อย แต่ความสามารถทำนายนอกตัวอย่างยังอ่อน จึงใช้เป็นข้อมูลประกอบเท่านั้น
+EO,MFREQ,Baseline,Cohort baseline,0.07652525951557092,0.11346498945905388,-0.024669633554328607,0.07652525951557092,0.0,ใช้ค่ากลางของ cohort เป็น reference; age/sex/Fall History ไม่ได้ช่วยทำนายให้ดีขึ้นอย่างสม่ำเสมอ
+EO,AREA_CE,Model B — Age + Sex + Fall History,Personalized regression,1.1405145986165597,1.7352958366411309,0.045135200389358476,1.2221621107266434,6.680579555975574,ใช้ Expected Sway แบบรายบุคคลได้ในฐานะข้อมูลประกอบ แต่ไม่ใช่เกณฑ์วินิจฉัย
+EC,RDIST,Baseline,Cohort baseline,0.19376605982722925,0.2546077885171013,-0.026773502123484283,0.19376605982722925,0.0,ใช้ค่ากลางของ cohort เป็น reference; age/sex/Fall History ไม่ได้ช่วยทำนายให้ดีขึ้นอย่างสม่ำเสมอ
+EC,MVELO,Baseline,Cohort baseline,0.26951435710716076,0.40966226515121007,-0.0244661298451454,0.26951435710716076,0.0,ใช้ค่ากลางของ cohort เป็น reference; age/sex/Fall History ไม่ได้ช่วยทำนายให้ดีขึ้นอย่างสม่ำเสมอ
+EC,MFREQ,Baseline,Cohort baseline,0.06664561171795055,0.10001988003579317,-0.02490656997255347,0.06664561171795055,0.0,ใช้ค่ากลางของ cohort เป็น reference; age/sex/Fall History ไม่ได้ช่วยทำนายให้ดีขึ้นอย่างสม่ำเสมอ
+EC,AREA_CE,Baseline,Cohort baseline,1.55797201994241,2.355175666062184,-0.029065143837396112,1.55797201994241,0.0,ใช้ค่ากลางของ cohort เป็น reference; age/sex/Fall History ไม่ได้ช่วยทำนายให้ดีขึ้นอย่างสม่ำเสมอ
