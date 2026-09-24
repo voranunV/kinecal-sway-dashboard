@@ -3,34 +3,67 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+from html import escape
+from math import cos, sin, pi
 from data_access import (load_data, DataError, METRICS, MOVEMENTS, CONDITIONS,
                          participant_ids, filter_observed, coverage)
+from comparison import COHORTS, age_group, reference_cohort, percentile, paired_percent_change
 
 st.set_page_config(page_title='ActiveAge Lab | Sway Explorer', page_icon='◌', layout='wide')
-COLORS = ['#276D8A', '#8372B2', '#C89C58', '#64748B']
+INDIGO = '#343A73'
+SKY = '#5DADE2'
+TURQUOISE = '#5BC0BE'
+COLORS = [INDIGO, SKY, TURQUOISE, '#8978BA']
 DISCLAIMER = ('This dashboard provides measurement and statistical comparison of camera-derived '
               'postural sway. It is not a diagnostic tool and does not predict future falls.')
 DESCRIPTIONS = {'RDIST': 'Root-mean-square sway distance', 'MVELO': 'Mean sway velocity',
                 'MFREQ': 'Mean sway-frequency measure', 'AREA_CE': 'Confidence-ellipse area'}
 PAGES = ['Overview', 'Participant Comparison', 'Eyes Open vs Eyes Closed',
          'Movement Comparison', 'Model Evidence / Limitations']
+NAV_ICONS = ['⌂', '♙', '◉', '▥', '◇']
 
 st.markdown('''<style>
-.block-container {max-width: 1440px; padding-top: 4.5rem; padding-bottom: 2rem;}
+.stApp {background: #F6F9FC; color: #202C48;}
+.block-container {max-width: 1440px; padding-top: 2.5rem; padding-bottom: 2rem;}
 h1 {letter-spacing: -.045em; font-weight: 750 !important;
  height: auto; line-height: 1.3; overflow: visible;}
 h2, h3 {letter-spacing: -.025em;}
-[data-testid="stMetric"] {background: #FFFFFF; border: 1px solid #DCE4EE;
- border-radius: 12px; padding: 16px 19px;}
+[data-testid="stMetric"] {background: #FFFFFF; border: 1px solid #DFE6F0;
+ border-radius: 16px; padding: 16px 19px; box-shadow: 0 4px 18px rgba(42,49,99,.04);}
 [data-testid="stMetricValue"] {font-variant-numeric: tabular-nums;}
 [data-testid="stMetricValue"] > div {white-space: normal; overflow-wrap: anywhere;
  font-size: 1.8rem; line-height: 1.25;}
 [data-testid="stMetricLabel"] p {white-space: normal;}
-[data-testid="stSidebar"] {border-right: 1px solid #DCE4EE;}
-.eyebrow {font-size: .76rem; letter-spacing: .17em; font-weight: 700; color: #276D8A;
+[data-testid="stSidebar"] {background:#2A3163; color:#F5F8FF; border-right: 0;}
+[data-testid="stSidebar"] h1, [data-testid="stSidebar"] p,
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {color:#F5F8FF;}
+[data-testid="stSidebar"] hr {border-color:rgba(255,255,255,.2);}
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] {gap:.35rem;}
+[data-testid="stSidebar"] [data-testid="stRadio"] label {
+  display:flex; width:100%; min-height:48px; padding:.65rem .85rem;
+  border-radius:12px; background:transparent; color:#F5F8FF;
+  transition:background-color .15s ease; cursor:pointer; align-items:center;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] label:hover {background:rgba(255,255,255,.08);}
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {background:#5DADE2; color:#14254A; font-weight:700;}
+[data-testid="stSidebar"] [data-testid="stRadio"] label:focus-within {outline:2px solid #5BC0BE; outline-offset:2px;}
+[data-testid="stSidebar"] [data-testid="stRadio"] label > div:first-child {position:absolute; opacity:0; width:1px; height:1px; overflow:hidden;}
+[data-testid="stSidebar"] [data-testid="stRadio"] label p {color:inherit; white-space:normal; overflow-wrap:anywhere; line-height:1.3;}
+.eyebrow {font-size: .76rem; letter-spacing: .17em; font-weight: 700; color: #343A73;
  height: auto; line-height: 1.6; padding-block: .15rem; overflow: visible;}
+.sidebar-brand {color:#8BD8DC !important; font-size:.76rem; letter-spacing:.15em; font-weight:750;}
 .scope {border-left: 3px solid #7B91AF; padding: .7rem 1rem; background:#EDF2F7;
  color: #42536B; font-size:.87rem; border-radius: 0 8px 8px 0; margin-bottom:1.4rem;}
+.gauge-grid {display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:1rem 0;}
+.gauge-card {background:#FFF; border:1px solid #DFE6F0; border-radius:16px;
+ padding:18px 12px 15px; text-align:center; min-width:0; box-shadow:0 4px 18px rgba(42,49,99,.04);}
+.gauge-card h3 {font-size:1rem; color:#273653; margin:0;}
+.gauge-card svg {display:block; width:100%; max-width:210px; margin:0 auto;}
+.gauge-card .gauge-note {font-size:.78rem; color:#596A83; line-height:1.35; margin:.1rem 0 0;}
+.gauge-card .gauge-value {font-size:1.6rem; font-weight:750; fill:#273653;}
+.gauge-card .gauge-sub {font-size:.7rem; fill:#596A83;}
+@media(max-width:1100px) {.gauge-grid {grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:650px) {.gauge-grid {grid-template-columns:1fr;}}
 </style>''', unsafe_allow_html=True)
 
 
@@ -58,6 +91,48 @@ def fmt(value, signed=False):
     if pd.isna(value):
         return 'Not available'
     return format(float(value), '+.3f' if signed else '.3f')
+
+
+def gauge_card(metric, value, count):
+    """A semantic, neutral semicircle for a rank within the selected cohort."""
+    if value is None:
+        return (f'<article class="gauge-card"><h3>{escape(metric)}</h3>'
+                '<p>Percentile unavailable</p><p class="gauge-note">At least two observations are required.</p></article>')
+    angle = pi * (1 - value / 100)
+    x, y = 100 + 80 * cos(angle), 104 - 80 * sin(angle)
+    progress = f'M 20 104 A 80 80 0 0 1 {x:.2f} {y:.2f}'
+    label = f'{metric}: {value:.1f} percentile among {count} participants'
+    return (f'<article class="gauge-card"><h3>{escape(metric)}</h3>'
+            f'<svg viewBox="0 0 200 142" role="img" aria-label="{escape(label)}">'
+            '<path d="M 20 104 A 80 80 0 0 1 180 104" fill="none" stroke="#E5EBF4" stroke-width="12"/>'
+            f'<path d="{progress}" fill="none" stroke="{TURQUOISE}" stroke-width="12"/>'
+            f'<circle cx="{x:.2f}" cy="{y:.2f}" r="5" fill="{INDIGO}"/>'
+            f'<text class="gauge-value" x="100" y="88" text-anchor="middle">{value:.1f}</text>'
+            '<text class="gauge-sub" x="100" y="103" text-anchor="middle">percentile</text>'
+            '<text class="gauge-sub" x="20" y="125" text-anchor="middle">0</text>'
+            '<text class="gauge-sub" x="180" y="125" text-anchor="middle">100</text></svg>'
+            f'<p class="gauge-note">Within selected KINECAL cohort · n={count}</p></article>')
+
+
+def change_gauge(change, extent):
+    """Neutral diverging semicircle; the endpoints are derived from the paired cohort."""
+    if change is None:
+        return '<p>Percentage change unavailable because the EO observation is zero.</p>'
+    fraction = (change / extent + 1) / 2
+    angle = pi * (1 - fraction)
+    x, y = 100 + 80 * cos(angle), 104 - 80 * sin(angle)
+    return (f'<article class="gauge-card" style="max-width:360px;margin:1rem auto">'
+            '<h3>EO → EC percentage change</h3>'
+            f'<svg viewBox="0 0 200 142" role="img" aria-label="EO to EC change {change:+.1f} percent">'
+            '<path d="M 20 104 A 80 80 0 0 1 180 104" fill="none" stroke="#DEE8F3" stroke-width="12"/>'
+            '<path d="M 100 24 L 100 104" stroke="#9BAAC0" stroke-width="1" stroke-dasharray="3 4"/>'
+            f'<circle cx="{x:.2f}" cy="{y:.2f}" r="6" fill="{INDIGO}"/>'
+            f'<text class="gauge-value" x="100" y="86" text-anchor="middle">{change:+.1f}%</text>'
+            '<text class="gauge-sub" x="100" y="103" text-anchor="middle">EC relative to EO</text>'
+            f'<text class="gauge-sub" x="22" y="125" text-anchor="middle">−{extent:.0f}%</text>'
+            '<text class="gauge-sub" x="100" y="19" text-anchor="middle">0</text>'
+            f'<text class="gauge-sub" x="178" y="125" text-anchor="middle">+{extent:.0f}%</text></svg>'
+            '<p class="gauge-note">Symmetric scale from available paired observations</p></article>')
 
 
 def chart(fig, key, height=380):
@@ -89,13 +164,15 @@ def metric_select(key):
 
 
 with st.sidebar:
-    st.markdown('<p class="eyebrow">ActiveAge Lab</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sidebar-brand">ACTIVEAGE LAB / KINECAL</p>', unsafe_allow_html=True)
     st.title('Sway Explorer')
     st.caption('KINECAL · Final Capstone')
-    page = st.radio('Explore', PAGES, key='page')
+    page = st.radio('Explore', PAGES, key='page', label_visibility='collapsed',
+                    format_func=lambda value: f'{NAV_ICONS[PAGES.index(value)]}   {value}')
     st.divider()
     st.markdown('**Measurement. Comparison.**\n\n**Decision support.**')
-    st.caption('90 participants · 517 records\n\n8 movements · 4 separate metrics')
+    st.caption(f'{people.part_id.nunique()} participants · {len(obs)} records\n\n'
+               f'{obs.movement.nunique()} movements · {len(METRICS)} separate metrics')
     st.caption('EO = Eyes Open · EC = Eyes Closed')
 
 st.markdown('<p class="eyebrow">KINECAL / CAMERA-DERIVED POSTURAL SWAY</p>', unsafe_allow_html=True)
@@ -170,62 +247,90 @@ def reset_filters():
 
 
 def participant():
-    st.write('Observed sway first. Supplied statistical references add context for quiet standing.')
-    a, b, c = st.columns([1, 1, 2])
-    pid = a.selectbox('Participant', participant_ids(people), key='participant_id')
-    condition = b.selectbox('Quiet-standing condition', ['EO', 'EC'], key='participant_condition')
-    with c:
-        metric = metric_select('participant_metric')
+    st.write('Locate a participant’s observed measurement within a selected KINECAL cohort.')
+    a, b, c = st.columns(3)
+    pid = a.selectbox('Select participant', participant_ids(people), key='participant_id')
+    available = obs[obs.part_id == pid]
+    movements_available = [m for m in MOVEMENTS if m in set(available.movement)]
+    movement = b.selectbox('Select movement', movements_available, format_func=MOVEMENTS.get,
+                            key='participant_movement')
+    cohort_choice = c.selectbox('Select reference cohort', COHORTS, key='participant_cohort')
     profile = people.set_index('part_id').loc[pid]
     a,b,c,d = st.columns(4)
     a.metric('Age (years)', f'{profile.age:g}')
     b.metric('Sex recorded in source', {'f':'Female','m':'Male'}.get(profile.sex, profile.sex))
     c.metric('Original group', profile['group'])
-    d.metric('Retrospective fall history', profile.fall_history)
-    available = obs[obs.part_id == pid]
-    st.caption('Available movements: ' + ' · '.join(MOVEMENTS[m] for m in MOVEMENTS if m in set(available.movement)))
-    row = expected[(expected.part_id == pid) & (expected.condition == condition) & (expected.outcome == metric)]
-    if row.empty:
-        st.info(f'No {condition} observation or statistical reference is available for {pid}. Select another condition or participant. Missing observations are not imputed.')
-        return
-    row = row.iloc[0]
-    model = models[(models.condition == condition) & (models.outcome == metric)].iloc[0]
-    cohort = obs[obs.movement == CONDITIONS[condition]]
-    a,b,c = st.columns(3)
-    a.metric(f'Observed {metric}', fmt(row.observed_sway))
-    b.metric('Percentile within condition', f'{row.observed_percentile_within_condition:.1f}%')
-    c.metric('Reference cohort', f'n = {len(cohort)}')
-    st.caption('Percentile = average tied rank ÷ number of participants × 100, within the full condition–metric cohort. It is not a clinical cutoff.')
-    st.subheader('Statistical reference')
-    st.markdown(f'**{model.reference_type}** · {model.selected_model}')
-    a,b,c = st.columns(3)
-    a.metric('Expected / reference sway', fmt(row.expected_sway))
-    b.metric('Observed − expected', fmt(row.observed_minus_expected, signed=True))
-    interval = pd.notna(row.prediction_interval_95_low) and pd.notna(row.prediction_interval_95_high)
-    c.metric('95% prediction interval',
-        f'{fmt(row.prediction_interval_95_low)} to {fmt(row.prediction_interval_95_high)}' if interval else 'Not available')
-    fig = go.Figure()
-    if interval:
-        fig.add_trace(go.Scatter(x=[row.prediction_interval_95_low, row.prediction_interval_95_high],
-            y=['Statistical reference']*2, mode='lines', line=dict(color='#B8C6D9', width=12), name='95% prediction interval'))
-    fig.add_trace(go.Scatter(x=[row.expected_sway], y=['Statistical reference'], mode='markers',
-        marker=dict(color=COLORS[1], size=15, symbol='diamond'), name='Expected / reference'))
-    fig.add_trace(go.Scatter(x=[row.observed_sway], y=['Observed'], mode='markers',
-        marker=dict(color=COLORS[0], size=16), name=f'{pid} observed'))
-    fig.update_xaxes(title=f'{metric} · source scale')
-    chart(fig, 'participant_reference', 240)
-    st.caption('Expected values are supplied full-fit references for existing participants. Out-of-fold evaluation is reported separately on Model Evidence. Prediction intervals are not confidence intervals or clinical thresholds; any negative endpoints are preserved from the export.')
-    st.subheader('Participant within the observed cohort')
-    fig = px.histogram(cohort, x=metric, nbins=24, color_discrete_sequence=['#9EB8CB'])
-    fig.add_vline(x=row.observed_sway, line_color=COLORS[0], line_width=3,
-                  annotation_text=f'{pid}: {fmt(row.observed_sway)}')
+    d.metric('Clinically at risk · source label', str(int(profile.clinically_at_risk)))
+    st.caption(f'Retrospective fall history: {profile.fall_history}. The original group, fall history and clinical label are different fields.')
+    selected = available.loc[available.movement.eq(movement)].iloc[0]
+    cohort = reference_cohort(obs, movement, profile, cohort_choice)
+    st.subheader('Position within the selected cohort')
+    st.caption(f'{MOVEMENTS[movement]} · {cohort_choice} · n={cohort.part_id.nunique()} participants. '
+               'Percentile uses average tied rank ÷ cohort size × 100 and includes the selected participant. '
+               'It describes relative position, not a clinical cutoff.')
+    ranks = {m: percentile(cohort, pid, m) for m in METRICS}
+    st.markdown('<div class="gauge-grid">' + ''.join(
+        gauge_card(m, ranks[m], cohort[m].notna().sum()) for m in METRICS) + '</div>',
+        unsafe_allow_html=True)
+    metric = metric_select('participant_metric')
+    st.subheader('Distribution behind the percentile')
+    fig = px.histogram(cohort, x=metric, nbins=24, color_discrete_sequence=['#A8B8D9'])
+    fig.add_vline(x=selected[metric], line_color=INDIGO, line_width=3,
+                  annotation_text=f'{pid}: {fmt(selected[metric])}')
     fig.update_layout(yaxis_title='Participants', xaxis_title=f'{metric} · source scale')
-    chart(fig, 'participant_distribution', 300)
-    st.info(model.dashboard_use_note_th)
-    with st.expander('Exact source values for this participant and condition'):
-        details = expected[(expected.part_id == pid) & (expected.condition == condition)]
-        table(details, 'participant_source')
-        download(details, f'{pid}_{condition}_statistical_reference.csv')
+    condition = next((c for c, m in CONDITIONS.items() if m == movement), None)
+    row = expected[(expected.part_id == pid) & (expected.condition == condition) &
+                   (expected.outcome == metric)]
+    if not row.empty:
+        fig.add_vline(x=row.iloc[0].expected_sway, line_color=SKY, line_dash='dash',
+                      annotation_text='Statistical reference')
+    chart(fig, 'participant_distribution', 330)
+    st.subheader('Observed vs expected · supplied statistical reference')
+    if row.empty:
+        st.info('A model reference is available only for quiet standing EO and EC in the supplied exports. '
+                'The observed values and cohort percentiles above remain available for this movement.')
+    else:
+        row = row.iloc[0]
+        model = models[(models.condition == condition) & (models.outcome == metric)].iloc[0]
+        st.caption(f'{condition} · {model.reference_type} · {model.selected_model}. '
+                   'This model reference uses the original full condition cohort; the selected descriptive cohort does not refit it.')
+        a,b,c = st.columns(3)
+        a.metric(f'Observed {metric}', fmt(row.observed_sway))
+        b.metric('Expected / reference', fmt(row.expected_sway))
+        c.metric('Observed − expected', fmt(row.observed_minus_expected, signed=True))
+        interval = pd.notna(row.prediction_interval_95_low) and pd.notna(row.prediction_interval_95_high)
+        fig = go.Figure()
+        if interval:
+            fig.add_trace(go.Scatter(x=[row.prediction_interval_95_low, row.prediction_interval_95_high],
+                y=['Reference']*2, mode='lines', line=dict(color='#B8C6D9', width=14), name='95% prediction interval'))
+        fig.add_trace(go.Scatter(x=[row.expected_sway], y=['Reference'], mode='markers',
+            marker=dict(color=SKY, size=15, symbol='diamond'), name='Expected / reference'))
+        fig.add_trace(go.Scatter(x=[row.observed_sway], y=['Observed'], mode='markers',
+            marker=dict(color=INDIGO, size=16), name=f'{pid} observed'))
+        fig.update_xaxes(title=f'{metric} · source scale')
+        chart(fig, 'participant_reference', 250)
+        st.caption('95% prediction interval: ' +
+                   (f'{fmt(row.prediction_interval_95_low)} to {fmt(row.prediction_interval_95_high)}. '
+                    if interval else 'Not available. ') +
+                   'Expected values are supplied full-fit references, not out-of-fold predictions. '
+                   'Negative interval endpoints are retained from the export; they are not physiological bounds.')
+        st.info(model.dashboard_use_note_th)
+    details = pd.DataFrame([{
+        'Metric': m, 'Observed': selected[m],
+        'Expected / reference': (expected.loc[(expected.part_id.eq(pid)) &
+            (expected.condition.eq(condition)) & (expected.outcome.eq(m)), 'expected_sway'].iloc[0]
+            if condition is not None else None),
+        'Percentile · selected cohort': ranks[m],
+    } for m in METRICS])
+    st.subheader('Metric details')
+    table(details, 'participant_details')
+    with st.expander('Exact supplied source rows for this participant and condition'):
+        source = expected[(expected.part_id == pid) & (expected.condition == condition)]
+        if not source.empty:
+            table(source, 'participant_source')
+            download(source, f'{pid}_{condition}_statistical_reference.csv')
+        else:
+            st.caption('No model reference is supplied for this movement.')
 
 
 def paired():
@@ -239,7 +344,21 @@ def paired():
     b.metric(f'{pid} · EO observed', fmt(row.EO_observed))
     c.metric(f'{pid} · EC observed', fmt(row.EC_observed))
     d.metric(f'{pid} · EC − EO', fmt(row.EC_minus_EO, signed=True))
-    st.caption('Complete pairs only · Full EO cohort: 85 · Full EC cohort: 87 · Paired cohort: 83. No missing condition is filled or matched across different people.')
+    eo_n = obs.loc[obs.movement.eq(CONDITIONS['EO']), 'part_id'].nunique()
+    ec_n = obs.loc[obs.movement.eq(CONDITIONS['EC']), 'part_id'].nunique()
+    st.caption(f'Complete pairs only · Full EO cohort: {eo_n} · Full EC cohort: {ec_n} · '
+               f'Paired cohort: {cohort.part_id.nunique()}. Missing conditions are never filled.')
+    changes = cohort.apply(lambda p: paired_percent_change(p.EO_observed, p.EC_observed), axis=1).dropna()
+    change = paired_percent_change(row.EO_observed, row.EC_observed)
+    if len(changes):
+        extent = max(1, float(changes.abs().max()))
+        st.markdown(change_gauge(change, extent), unsafe_allow_html=True)
+    if change is not None:
+        direction = 'increased' if change > 0 else 'decreased' if change < 0 else 'did not change'
+        st.caption(f'{metric} {direction} by {abs(change):.1f}% from EO to EC for {pid}. '
+                   'Percentage change = (EC − EO) ÷ EO × 100; the direction is descriptive only.')
+    else:
+        st.caption('Percentage change is undefined when EO is zero. The absolute difference remains available above.')
     st.subheader('Paired observed measurements')
     fig = go.Figure()
     # A single neutral background trace keeps all pairs visible without a large legend.
