@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 import streamlit as st
 from html import escape
 from math import cos, sin, pi
+from pathlib import Path
+from urllib.parse import quote
 from data_access import (load_data, DataError, METRICS, MOVEMENTS, CONDITIONS,
                          participant_ids, filter_observed, coverage)
 from comparison import COHORTS, age_group, reference_cohort, percentile, paired_percent_change
@@ -20,7 +22,28 @@ DESCRIPTIONS = {'RDIST': 'Root-mean-square sway distance', 'MVELO': 'Mean sway v
                 'MFREQ': 'Mean sway-frequency measure', 'AREA_CE': 'Confidence-ellipse area'}
 PAGES = ['Overview', 'Participant Comparison', 'Eyes Open vs Eyes Closed',
          'Movement Comparison', 'Model Evidence / Limitations']
-NAV_ICONS = ['⌂', '♙', '◉', '▥', '◇']
+
+# Inline SVG masks leave the native radio controls accessible by keyboard.
+NAV_PATHS = [
+    '<path d="m3 10 9-7 9 7v10H3zM9 20v-6h6v6"/>',
+    '<circle cx="12" cy="7" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>',
+    '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+    '<path d="M3 20h18M5 16v-5h3v5M11 16V5h3v11M17 16V9h3v7"/>',
+    '<path d="M5 2h10l4 4v16H5zM15 2v5h4M8 12h8M8 16h6"/>',
+]
+ASSETS = Path(__file__).resolve().parent / 'assets'
+
+
+def nav_icon_css():
+    rules = []
+    for index, drawing in enumerate(NAV_PATHS, 1):
+        svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" '
+               f'fill="none" stroke="black" stroke-width="2" stroke-linecap="round" '
+               f'stroke-linejoin="round">{drawing}</svg>')
+        rules.append(f'[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child({index}) '
+                     f'[data-testid="stRadioOption"]::before '
+                     '{mask-image:url("data:image/svg+xml,' + quote(svg, safe='') + '");}')
+    return '\n'.join(rules)
 
 st.markdown('''<style>
 .stApp {background: #F6F9FC; color: #202C48;}
@@ -44,12 +67,31 @@ h2, h3 {letter-spacing: -.025em;}
   display:flex; width:100%; min-height:48px; padding:.65rem .85rem;
   border-radius:12px; background:transparent; color:#F5F8FF;
   transition:background-color .15s ease; cursor:pointer; align-items:center; box-sizing:border-box;
+  gap:.75rem;
+}
+[data-testid="stSidebar"] [data-testid="stRadioOption"]::before {
+  content:""; display:block; width:20px; height:20px; flex:0 0 20px;
+  background:currentColor; mask-repeat:no-repeat; mask-position:center; mask-size:contain;
 }
 [data-testid="stSidebar"] [data-testid="stRadioOption"]:hover {background:rgba(255,255,255,.08);}
 [data-testid="stSidebar"] [data-testid="stRadioOption"][data-selected="true"] {background:#5DADE2; color:#14254A; font-weight:700;}
 [data-testid="stSidebar"] [data-testid="stRadioOption"]:focus-within {outline:2px solid #5BC0BE; outline-offset:2px;}
 [data-testid="stSidebar"] [data-testid="stRadioOption"] > div > div:first-child {display:none;}
 [data-testid="stSidebar"] [data-testid="stRadioOption"] p {color:inherit; white-space:normal; overflow-wrap:anywhere; line-height:1.3;}
+[data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] {
+  min-height:calc(100vh - 3rem); display:flex; flex-direction:column;
+}
+[data-testid="stSidebar"] [data-testid="stElementContainer"]:has(.sidebar-footer) {margin-top:auto;}
+.brand-lockup {display:flex; align-items:center; gap:.8rem; margin:.3rem 0 .55rem;}
+.brand-lockup svg {width:62px; height:62px; flex:0 0 62px;}
+.brand-name {font-size:1.32rem; font-weight:800; letter-spacing:.15em; line-height:1.1; color:white;}
+.brand-sub {font-size:.78rem; color:#B8D8E9; margin-top:.25rem; line-height:1.3;}
+.sidebar-footer {border-top:1px solid rgba(196,222,244,.3); margin-top:1.2rem; padding-top:.5rem;}
+.sidebar-footer svg {display:block; width:100%; max-height:185px; margin:0 auto -.3rem;}
+.sidebar-footer .tagline {font-size:1rem; font-style:italic; line-height:1.35;
+  color:#D9F3FA; margin:0 0 .8rem; letter-spacing:.01em;}
+.sidebar-footer .version {font-size:.73rem; color:#BCD3E9; line-height:1.55; margin:0;}
+.sidebar-footer .detail {font-size:.7rem; color:#BACFE5; line-height:1.5; margin:.55rem 0 0;}
 .eyebrow {font-size: .76rem; letter-spacing: .17em; font-weight: 700; color: #343A73;
  height: auto; line-height: 1.6; padding-block: .15rem; overflow: visible;}
 .sidebar-brand {color:#8BD8DC !important; font-size:.76rem; letter-spacing:.15em; font-weight:750;}
@@ -66,6 +108,7 @@ h2, h3 {letter-spacing: -.025em;}
 @media(max-width:1100px) {.gauge-grid {grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:650px) {.gauge-grid {grid-template-columns:1fr;}}
 </style>''', unsafe_allow_html=True)
+st.markdown('<style>' + nav_icon_css() + '</style>', unsafe_allow_html=True)
 
 
 @st.cache_data(show_spinner=False)
@@ -165,16 +208,22 @@ def metric_select(key):
 
 
 with st.sidebar:
-    st.markdown('<p class="sidebar-brand">ACTIVEAGE LAB / KINECAL</p>', unsafe_allow_html=True)
-    st.title('Sway Explorer')
-    st.caption('KINECAL · Final Capstone')
+    mark = (ASSETS / 'brand_mark.svg').read_text(encoding='utf-8')
+    st.markdown('<div class="brand-lockup">' + mark +
+                '<div><div class="brand-name">KINECAL</div>'
+                '<div class="brand-sub">Sway Explorer<br>Movement insights</div></div></div>',
+                unsafe_allow_html=True)
     page = st.radio('Explore', PAGES, key='page', label_visibility='collapsed',
-                    format_func=lambda value: f'{NAV_ICONS[PAGES.index(value)]}   {value}')
-    st.divider()
-    st.markdown('**Measurement. Comparison.**\n\n**Decision support.**')
-    st.caption(f'{people.part_id.nunique()} participants · {len(obs)} records\n\n'
-               f'{obs.movement.nunique()} movements · {len(METRICS)} separate metrics')
-    st.caption('EO = Eyes Open · EC = Eyes Closed')
+                    format_func=lambda value: value)
+    motion = (ASSETS / 'sidebar_motion.svg').read_text(encoding='utf-8')
+    st.markdown('<div class="sidebar-footer">' + motion +
+                '<p class="tagline">Move Well<br>Age Well<br>Live Brighter</p>'
+                '<p class="version">KINECAL v1.0.3<br>ActiveAge Lab · Final Capstone</p>'
+                f'<p class="detail">{people.part_id.nunique()} participants · {len(obs)} records<br>'
+                f'{obs.movement.nunique()} movements · {len(METRICS)} separate metrics<br>'
+                'EO = Eyes Open · EC = Eyes Closed<br>'
+                'Measurement · Comparison · Decision support</p></div>',
+                unsafe_allow_html=True)
 
 st.markdown('<p class="eyebrow">KINECAL / CAMERA-DERIVED POSTURAL SWAY</p>', unsafe_allow_html=True)
 st.title(page)

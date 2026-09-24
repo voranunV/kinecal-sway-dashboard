@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 92 92" role="img" aria-label="KINECAL movement mark">
+  <circle cx="46" cy="46" r="42" fill="#394779"/>
+  <path d="M24 22C12 35 12 56 24 69M68 22c12 13 12 34 0 47" fill="none" stroke="#5BC0BE" stroke-width="3" stroke-linecap="round"/>
+  <path d="M34 16c-9 7-14 16-15 25M58 16c9 7 14 16 15 25" fill="none" stroke="#80BDEB" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+  <circle cx="47" cy="25" r="6" fill="#F5FAFF"/>
+  <path d="M47 33l-3 18m0 0-13 13m13-13 16 12M45 38 31 44m15-6 15 7" fill="none" stroke="#F5FAFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M30 64l-4 6m35-7 5 5" fill="none" stroke="#80BDEB" stroke-width="3" stroke-linecap="round"/>
+</svg>
