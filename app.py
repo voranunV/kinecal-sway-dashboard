@@ -79,7 +79,7 @@ h2, h3 {letter-spacing: -.025em;}
 [data-testid="stSidebar"] [data-testid="stRadioOption"] > div > div:first-child {display:none;}
 [data-testid="stSidebar"] [data-testid="stRadioOption"] p {color:inherit; white-space:normal; overflow-wrap:anywhere; line-height:1.3;}
 [data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] {
-  min-height:calc(100vh - 3rem); display:flex; flex-direction:column;
+  min-height:calc(100vh - 8rem); display:flex; flex-direction:column;
 }
 [data-testid="stSidebar"] [data-testid="stElementContainer"]:has(.sidebar-footer) {margin-top:auto;}
 .brand-lockup {display:flex; align-items:center; gap:.8rem; margin:.3rem 0 .55rem;}
@@ -87,7 +87,7 @@ h2, h3 {letter-spacing: -.025em;}
 .brand-name {font-size:1.32rem; font-weight:800; letter-spacing:.15em; line-height:1.1; color:white;}
 .brand-sub {font-size:.78rem; color:#B8D8E9; margin-top:.25rem; line-height:1.3;}
 .sidebar-footer {border-top:1px solid rgba(196,222,244,.3); margin-top:1.2rem; padding-top:.5rem;}
-.sidebar-footer svg {display:block; width:100%; max-height:185px; margin:0 auto -.3rem;}
+.sidebar-footer svg {display:block; width:100%; max-height:150px; margin:0 auto -.3rem;}
 .sidebar-footer .tagline {font-size:1rem; font-style:italic; line-height:1.35;
   color:#D9F3FA; margin:0 0 .8rem; letter-spacing:.01em;}
 .sidebar-footer .version {font-size:.73rem; color:#BCD3E9; line-height:1.55; margin:0;}
