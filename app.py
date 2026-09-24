@@ -39,16 +39,17 @@ h2, h3 {letter-spacing: -.025em;}
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {color:#F5F8FF;}
 [data-testid="stSidebar"] hr {border-color:rgba(255,255,255,.2);}
 [data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] {gap:.35rem;}
-[data-testid="stSidebar"] [data-testid="stRadio"] label {
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > div {width:100%;}
+[data-testid="stSidebar"] [data-testid="stRadioOption"] {
   display:flex; width:100%; min-height:48px; padding:.65rem .85rem;
   border-radius:12px; background:transparent; color:#F5F8FF;
-  transition:background-color .15s ease; cursor:pointer; align-items:center;
+  transition:background-color .15s ease; cursor:pointer; align-items:center; box-sizing:border-box;
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] label:hover {background:rgba(255,255,255,.08);}
-[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {background:#5DADE2; color:#14254A; font-weight:700;}
-[data-testid="stSidebar"] [data-testid="stRadio"] label:focus-within {outline:2px solid #5BC0BE; outline-offset:2px;}
-[data-testid="stSidebar"] [data-testid="stRadio"] label > div:first-child {position:absolute; opacity:0; width:1px; height:1px; overflow:hidden;}
-[data-testid="stSidebar"] [data-testid="stRadio"] label p {color:inherit; white-space:normal; overflow-wrap:anywhere; line-height:1.3;}
+[data-testid="stSidebar"] [data-testid="stRadioOption"]:hover {background:rgba(255,255,255,.08);}
+[data-testid="stSidebar"] [data-testid="stRadioOption"][data-selected="true"] {background:#5DADE2; color:#14254A; font-weight:700;}
+[data-testid="stSidebar"] [data-testid="stRadioOption"]:focus-within {outline:2px solid #5BC0BE; outline-offset:2px;}
+[data-testid="stSidebar"] [data-testid="stRadioOption"] > div > div:first-child {display:none;}
+[data-testid="stSidebar"] [data-testid="stRadioOption"] p {color:inherit; white-space:normal; overflow-wrap:anywhere; line-height:1.3;}
 .eyebrow {font-size: .76rem; letter-spacing: .17em; font-weight: 700; color: #343A73;
  height: auto; line-height: 1.6; padding-block: .15rem; overflow: visible;}
 .sidebar-brand {color:#8BD8DC !important; font-size:.76rem; letter-spacing:.15em; font-weight:750;}
